@@ -99,6 +99,7 @@ details.ev summary .sum{color:var(--muted);min-width:0;overflow-wrap:anywhere}
 details.ev summary .edit{color:var(--accent);font-weight:700;white-space:nowrap}
 details.ev[open] summary .edit{display:none}
 .evbody{display:grid;gap:14px;margin-top:12px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
@@ -126,17 +127,14 @@ details.ev[open] summary .edit{display:none}
     <section>
       <h2><span class="step">1</span>Scan the card</h2>
       <div class="scan">
-        <div class="drop" id="drop" role="button" tabindex="0" aria-label="Take a photo of the card front">
+        <div class="drop" id="drop" role="button" tabindex="0" aria-label="Scan the card front: take a photo or choose from library">
           <div class="ph" id="dropPh">
             <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="13" width="38" height="27" rx="4"/><path d="M17 13l3-5h8l3 5"/><circle cx="24" cy="26.5" r="7.5"/></svg>
             <span class="big">Tap to scan card</span>
-            <span class="sub">Front side. Lay the card flat and fill the frame.</span>
+            <span class="sub">Take a photo or choose one from your library</span>
           </div>
         </div>
-        <div class="pick">
-          <label for="fileCam">Take photo<input id="fileCam" type="file" accept="image/*" capture="environment"></label>
-          <label for="fileLib" class="alt">Upload<input id="fileLib" type="file" accept="image/*"></label>
-        </div>
+        <input id="fileLib" class="vh" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
         <div class="backrow">
           <img class="backthumb" id="backThumb" alt="Card back" hidden>
           <label for="fileBack" class="linkbtn" id="backLbl">+ Add back side (optional)<input id="fileBack" type="file" accept="image/*"></label>
@@ -340,11 +338,11 @@ async function takeFile(side, f){
   if (side === "front"){ setFront(url); doScan(); }
   else { setBack(url); if (shots.front) setStatus("scanStatus", "Back side added. Tap Scan card to read both sides."); }
 }
-for (const id of ["fileCam", "fileLib"]) $(id).addEventListener("change", e => { takeFile("front", e.target.files && e.target.files[0]); e.target.value = ""; });
+for (const id of ["fileLib"]) $(id).addEventListener("change", e => { takeFile("front", e.target.files && e.target.files[0]); e.target.value = ""; });
 $("fileBack").addEventListener("change", e => { takeFile("back", e.target.files && e.target.files[0]); e.target.value = ""; });
 $("backRemove").onclick = () => setBack(null);
-$("drop").onclick = () => $("fileCam").click();
-$("drop").onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); $("fileCam").click(); } };
+$("drop").onclick = () => $("fileLib").click();
+$("drop").onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); $("fileLib").click(); } };
 for (const t of ["dragenter", "dragover"]) $("drop").addEventListener(t, e => { e.preventDefault(); $("drop").classList.add("drag"); });
 $("drop").addEventListener("dragleave", () => $("drop").classList.remove("drag"));
 $("drop").addEventListener("drop", e => { e.preventDefault(); $("drop").classList.remove("drag"); takeFile("front", e.dataTransfer.files && e.dataTransfer.files[0]); });
