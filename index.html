@@ -127,7 +127,10 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
         <label for="f_mobile">手機<input id="f_mobile" type="text" inputmode="tel"></label>
         <label for="f_phone">電話<input id="f_phone" type="text" inputmode="tel"></label>
       </div>
-      <label for="f_address">地址<input id="f_address" type="text"></label>
+      <div class="row">
+        <label for="f_address">地址<input id="f_address" type="text"></label>
+        <label for="f_country">國家<input id="f_country" type="text" placeholder="例：美國"></label>
+      </div>
       <div class="row">
         <label for="f_website">網站<input id="f_website" type="text"></label>
         <label for="f_other">其他聯絡方式<input id="f_other" type="text" placeholder="LINE / WeChat / IG"></label>
@@ -159,7 +162,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 
 <script>
 const $ = id => document.getElementById(id);
-const FIELDS = ["name","company","title","mobile","phone","email","address","website","other"];
+const FIELDS = ["name","company","title","mobile","phone","email","address","country","website","other"];
 const shots = { front: null, back: null };
 let category = "", code = "";
 
