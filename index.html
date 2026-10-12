@@ -66,6 +66,11 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);
 @keyframes r{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 [hidden]{display:none!important}
+.field{display:grid;gap:8px}
+.lbl{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.04em}
+.addrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.mini{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:0 12px;cursor:pointer;white-space:nowrap}
+.mini:disabled{opacity:.45;cursor:not-allowed}
 body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 </style>
 </head>
@@ -89,10 +94,16 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
         <div class="shot" id="shotBack"><span><b>背面</b>選填</span>
           <input id="fileBack" type="file" accept="image/*" capture="environment" aria-label="名片背面"></div>
       </div>
-      <div class="row">
-        <label for="met">認識場合<input id="met" type="text" placeholder="例：AIMExpo 2026 攤位"></label>
-        <label for="metDate">認識日期<input id="metDate" type="date"></label>
+      <div class="field">
+        <span class="lbl" id="metLbl">認識場合</span>
+        <div class="chips" id="metChips" role="group" aria-labelledby="metLbl"></div>
+        <div class="addrow">
+          <input id="met" type="text" placeholder="點選上面的選項，或輸入新的場合" aria-labelledby="metLbl">
+          <button class="mini" id="addMetBtn" type="button" hidden>＋ 加入選項</button>
+        </div>
+        <div class="status" id="metStatus" role="status"></div>
       </div>
+      <label for="metDate">認識日期<input id="metDate" type="date"></label>
       <label for="scanner">掃描人（你的名字）<input id="scanner" type="text" placeholder="例：Lucio"></label>
       <button class="btn" id="scanBtn" disabled>辨識名片</button>
       <div class="status" id="scanStatus" role="status"></div>
@@ -197,8 +208,42 @@ function openApp(){
   $("metDate").value = today();
   $("met").value = store.get("lastMet", "");
   $("scanner").value = store.get("scanner", "");
+  try { events = JSON.parse(store.get("events", "[]")) || []; } catch(e) { events = []; }
+  renderEvents();
+  loadEvents();
   loadRecent();
 }
+
+// ---------- 認識場合選項（所有人共用，存在 Sheet 的「選項」分頁） ----------
+let events = [];
+function renderEvents(){
+  const v = $("met").value.trim(), box = $("metChips");
+  box.textContent = "";
+  for (const ev of events){
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = ev;
+    b.setAttribute("aria-pressed", String(v === ev));
+    b.onclick = () => { $("met").value = $("met").value.trim() === ev ? "" : ev; setStatus("metStatus", ""); renderEvents(); };
+    box.append(b);
+  }
+  $("addMetBtn").hidden = !v || events.some(e => e.toLowerCase() === v.toLowerCase());
+}
+async function loadEvents(){
+  try { events = await run("getEvents", code); store.set("events", JSON.stringify(events)); } catch(e) {}
+  renderEvents();
+}
+$("met").addEventListener("input", () => { setStatus("metStatus", ""); renderEvents(); });
+$("addMetBtn").onclick = async () => {
+  const name = $("met").value.trim(); if (!name) return;
+  $("addMetBtn").disabled = true;
+  setStatus("metStatus", "加入中…", "busy");
+  try {
+    events = await run("addEvent", name, code);
+    store.set("events", JSON.stringify(events));
+    setStatus("metStatus", "已加入選項「" + name + "」，所有同事都看得到。", "ok");
+  } catch(e) { setStatus("metStatus", "加入失敗：" + errMsg(e), "bad"); }
+  finally { $("addMetBtn").disabled = false; renderEvents(); }
+};
 
 // ---------- 照片 ----------
 async function shrink(file, max = 1600, q = 0.82){
