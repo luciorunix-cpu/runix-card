@@ -68,7 +68,10 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);
 [hidden]{display:none!important}
 .field{display:grid;gap:8px}
 .lbl{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.04em}
-.addrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.addrow{display:flex;gap:8px;align-items:stretch}
+.addrow input{flex:1 1 auto}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;max-width:100%;min-width:0;min-height:44px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
 .mini{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:0 12px;cursor:pointer;white-space:nowrap}
 .mini:disabled{opacity:.45;cursor:not-allowed}
 body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
