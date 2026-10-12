@@ -75,6 +75,30 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);
 .addrow input{flex:1 1 auto}
 .mini{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:0 12px;cursor:pointer;white-space:nowrap}
 .mini:disabled{opacity:.45;cursor:not-allowed}
+.scan{display:grid;gap:12px}
+.drop{position:relative;width:100%;max-width:100%;aspect-ratio:1.6/1;border:2px dashed var(--accent);border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;text-align:center;overflow:hidden;cursor:pointer;color:var(--ink)}
+.drop.has{border-style:solid;border-color:var(--line);background:var(--ink)}
+.drop.drag{outline:3px solid var(--accent);outline-offset:2px}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.drop .ph{display:grid;gap:6px;justify-items:center;padding:16px}
+.drop svg{width:56px;height:56px;stroke:var(--accent);fill:none;stroke-width:2.2;stroke-linejoin:round}
+.drop .big{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.1}
+.drop .sub{font-size:14px;color:var(--muted)}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick label{display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px;border-radius:10px;font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;color:var(--accent-ink);background:var(--accent);border:1.5px solid var(--accent)}
+.pick label.alt{background:transparent;color:var(--accent)}
+.pick label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.pick input,.backrow input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.backrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-height:32px}
+.backthumb{width:72px;aspect-ratio:1.6/1;border-radius:6px;object-fit:cover;border:1px solid var(--line)}
+.linkbtn,.backrow label.linkbtn{display:inline;font:inherit;font-size:15px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--accent);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+details.ev{border-top:1px solid var(--line);padding-top:12px}
+details.ev summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:15px}
+details.ev summary::-webkit-details-marker{display:none}
+details.ev summary .sum{color:var(--muted);min-width:0;overflow-wrap:anywhere}
+details.ev summary .edit{color:var(--accent);font-weight:700;white-space:nowrap}
+details.ev[open] summary .edit{display:none}
+.evbody{display:grid;gap:14px;margin-top:12px}
 </style>
 </head>
 <body>
@@ -100,26 +124,43 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);
 
   <div id="app" hidden style="display:grid;gap:18px">
     <section>
-      <h2><span class="step">1</span>Snap the card</h2>
-      <div class="shots">
-        <div class="shot" id="shotFront"><span><b>Front</b>Tap to take or pick a photo</span>
-          <input id="fileFront" type="file" accept="image/*" capture="environment" aria-label="Card front"></div>
-        <div class="shot" id="shotBack"><span><b>Back</b>Optional</span>
-          <input id="fileBack" type="file" accept="image/*" capture="environment" aria-label="Card back"></div>
-      </div>
-      <div class="field">
-        <span class="lbl" id="metLbl">Where we met</span>
-        <div class="chips" id="metChips" role="group" aria-labelledby="metLbl"></div>
-        <div class="addrow">
-          <input id="met" type="text" placeholder="Pick one above, or type a new event" aria-labelledby="metLbl">
-          <button class="mini" id="addMetBtn" type="button" hidden>+ Add option</button>
+      <h2><span class="step">1</span>Scan the card</h2>
+      <div class="scan">
+        <div class="drop" id="drop" role="button" tabindex="0" aria-label="Take a photo of the card front">
+          <div class="ph" id="dropPh">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="13" width="38" height="27" rx="4"/><path d="M17 13l3-5h8l3 5"/><circle cx="24" cy="26.5" r="7.5"/></svg>
+            <span class="big">Tap to scan card</span>
+            <span class="sub">Front side. Lay the card flat and fill the frame.</span>
+          </div>
         </div>
-        <div class="status" id="metStatus" role="status"></div>
+        <div class="pick">
+          <label for="fileCam">Take photo<input id="fileCam" type="file" accept="image/*" capture="environment"></label>
+          <label for="fileLib" class="alt">Upload<input id="fileLib" type="file" accept="image/*"></label>
+        </div>
+        <div class="backrow">
+          <img class="backthumb" id="backThumb" alt="Card back" hidden>
+          <label for="fileBack" class="linkbtn" id="backLbl">+ Add back side (optional)<input id="fileBack" type="file" accept="image/*"></label>
+          <button class="linkbtn" id="backRemove" type="button" hidden>Remove</button>
+        </div>
+        <button class="btn" id="scanBtn" disabled>Scan card</button>
+        <div class="status" id="scanStatus" role="status"></div>
       </div>
-      <label for="metDate">Date met<input id="metDate" type="date"></label>
-      <label for="scanner">Scanned by (your name)<input id="scanner" type="text" placeholder="e.g. Lucio"></label>
-      <button class="btn" id="scanBtn" disabled>Scan card</button>
-      <div class="status" id="scanStatus" role="status"></div>
+      <details class="ev" id="evBox">
+        <summary><span class="sum" id="evSum">Event details</span><span class="edit">Edit</span></summary>
+        <div class="evbody">
+          <div class="field">
+            <span class="lbl" id="metLbl">Where we met</span>
+            <div class="chips" id="metChips" role="group" aria-labelledby="metLbl"></div>
+            <div class="addrow">
+              <input id="met" type="text" placeholder="Pick one above, or type a new event" aria-labelledby="metLbl">
+              <button class="mini" id="addMetBtn" type="button" hidden>+ Add option</button>
+            </div>
+            <div class="status" id="metStatus" role="status"></div>
+          </div>
+          <label for="metDate">Date met<input id="metDate" type="date"></label>
+          <label for="scanner">Scanned by (your name)<input id="scanner" type="text" placeholder="e.g. Lucio"></label>
+        </div>
+      </details>
     </section>
 
     <section id="review">
@@ -221,6 +262,7 @@ $("codeBtn").onclick = async () => {
 };
 function openApp(){
   $("app").hidden = false;
+  setTimeout(() => { updateEvSum(); $("evBox").open = !$("scanner").value.trim(); }, 0);
   $("metDate").value = today();
   $("met").value = store.get("lastMet", "");
   $("scanner").value = store.get("scanner", "");
@@ -243,6 +285,7 @@ function renderEvents(){
     box.append(b);
   }
   $("addMetBtn").hidden = !v || events.some(e => e.toLowerCase() === v.toLowerCase());
+  updateEvSum();
 }
 async function loadEvents(){
   try { events = await run("getEvents", code); store.set("events", JSON.stringify(events)); } catch(e) {}
@@ -273,20 +316,45 @@ async function shrink(file, max = 1600, q = 0.82){
     return c.toDataURL("image/jpeg", q);
   } finally { URL.revokeObjectURL(url); }
 }
-function bindShot(side, inputId, boxId){
-  $(inputId).addEventListener("change", async e => {
-    const f = e.target.files && e.target.files[0]; if (!f) return;
-    try { shots[side] = await shrink(f); } catch(err){ setStatus("scanStatus", "This photo can't be read. Please retake it.", "bad"); return; }
-    const box = $(boxId);
-    box.querySelector("img")?.remove(); box.querySelector(".x")?.remove();
-    const img = document.createElement("img"); img.src = shots[side]; img.alt = side === "front" ? "Card front" : "Card back"; box.prepend(img);
-    const x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Remove photo");
-    x.onclick = ev => { ev.stopPropagation(); shots[side] = null; img.remove(); x.remove(); $(inputId).value = ""; refresh(); };
-    box.append(x); refresh();
-  });
+function setFront(url){
+  shots.front = url;
+  const d = $("drop");
+  d.querySelector("img")?.remove();
+  if (url){ const img = document.createElement("img"); img.src = url; img.alt = "Card front"; d.prepend(img); }
+  d.classList.toggle("has", !!url);
+  $("dropPh").hidden = !!url;
+  d.setAttribute("aria-label", url ? "Retake the card front" : "Take a photo of the card front");
+  refresh();
 }
-bindShot("front", "fileFront", "shotFront");
-bindShot("back", "fileBack", "shotBack");
+function setBack(url){
+  shots.back = url;
+  $("backThumb").hidden = !url; if (url) $("backThumb").src = url;
+  $("backRemove").hidden = !url;
+  $("backLbl").firstChild.nodeValue = url ? "Change back side" : "+ Add back side (optional)";
+  refresh();
+}
+async function takeFile(side, f){
+  if (!f) return;
+  let url;
+  try { url = await shrink(f); } catch(err){ setStatus("scanStatus", "This photo can't be read. Please retake it.", "bad"); return; }
+  if (side === "front"){ setFront(url); doScan(); }
+  else { setBack(url); if (shots.front) setStatus("scanStatus", "Back side added. Tap Scan card to read both sides."); }
+}
+for (const id of ["fileCam", "fileLib"]) $(id).addEventListener("change", e => { takeFile("front", e.target.files && e.target.files[0]); e.target.value = ""; });
+$("fileBack").addEventListener("change", e => { takeFile("back", e.target.files && e.target.files[0]); e.target.value = ""; });
+$("backRemove").onclick = () => setBack(null);
+$("drop").onclick = () => $("fileCam").click();
+$("drop").onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); $("fileCam").click(); } };
+for (const t of ["dragenter", "dragover"]) $("drop").addEventListener(t, e => { e.preventDefault(); $("drop").classList.add("drag"); });
+$("drop").addEventListener("dragleave", () => $("drop").classList.remove("drag"));
+$("drop").addEventListener("drop", e => { e.preventDefault(); $("drop").classList.remove("drag"); takeFile("front", e.dataTransfer.files && e.dataTransfer.files[0]); });
+
+// ---------- event details summary ----------
+function updateEvSum(){
+  const who = $("scanner").value.trim();
+  $("evSum").textContent = [$("met").value.trim() || "No event picked", $("metDate").value, who ? "by " + who : "add your name"].filter(Boolean).join(" \u00B7 ");
+}
+for (const id of ["met", "metDate", "scanner"]) $(id).addEventListener("input", updateEvSum);
 function refresh(){ $("scanBtn").disabled = !shots.front; }
 function imagesPayload(){ return [shots.front, shots.back].filter(Boolean).map(d => ({ data: d.split(",")[1] })); }
 
@@ -295,7 +363,8 @@ function setCat(v){ category = v || ""; for (const b of $("cats").children) b.se
 $("cats").addEventListener("click", e => { const b = e.target.closest(".chip"); if (b) setCat(category === b.dataset.v ? "" : b.dataset.v); });
 
 // ---------- scan ----------
-$("scanBtn").onclick = async () => {
+async function doScan(){
+  if (!shots.front) return;
   $("scanBtn").disabled = true;
   setStatus("scanStatus", "Reading the card… (about 5–15 seconds)", "busy");
   try{
@@ -308,7 +377,8 @@ $("scanBtn").onclick = async () => {
     $("review").scrollIntoView({ behavior: "smooth", block: "start" });
   }catch(e){ setStatus("scanStatus", errMsg(e) + " You can also fill in the fields below by hand.", "bad"); }
   finally{ refresh(); }
-};
+}
+$("scanBtn").onclick = doScan;
 
 // ---------- save ----------
 $("saveBtn").onclick = async () => {
@@ -330,11 +400,10 @@ $("saveBtn").onclick = async () => {
 function clearCard(){
   for (const k of FIELDS) $("f_" + k).value = "";
   $("f_notes").value = ""; setCat("");
-  for (const [s, input, box] of [["front","fileFront","shotFront"],["back","fileBack","shotBack"]]){
-    shots[s] = null; $(input).value = ""; $(box).querySelector("img")?.remove(); $(box).querySelector(".x")?.remove();
-  }
+  setFront(null); setBack(null);
   note("Ready for the next card. Event, date and your name are kept.");
   refresh();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 $("resetBtn").onclick = () => { clearCard(); setStatus("saveStatus", ""); setStatus("scanStatus", ""); };
 
