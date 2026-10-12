@@ -1,11 +1,11 @@
 {
-  "name": "RUNIX 名片掃描",
-  "short_name": "名片掃描",
+  "name": "RUNIX Card Scanner",
+  "short_name": "Card Scanner",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#EEF0EC",
-  "theme_color": "#1F6B50",
+  "background_color": "#111511",
+  "theme_color": "#111511",
   "icons": [
     {
       "src": "icon-512.png",

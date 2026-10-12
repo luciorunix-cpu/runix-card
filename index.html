@@ -1,161 +1,171 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RUNIX 名片掃描</title>
-<meta name="theme-color" content="#1F6B50">
+<title>RUNIX Card Scanner</title>
+<meta name="theme-color" content="#111511">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="名片掃描">
+<meta name="apple-mobile-web-app-title" content="Card Scanner">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;700&display=swap">
 <style>
 :root{
-  --bg:#EEF0EC; --surface:#FFFFFF; --ink:#1B2220; --muted:#5E6A66; --line:#D5DAD5;
-  --accent:#1F6B50; --accent-ink:#FFFFFF; --accent-soft:#DCEBE3;
+  --bg:#EEF1EC; --surface:#FFFFFF; --ink:#151A15; --muted:#5B665B; --line:#D3DAD2;
+  --brand:#36D330; --accent:#1B8A17; --accent-ink:#FFFFFF; --accent-soft:#DDF3DA;
   --warn-soft:#FBEBD0; --bad:#A3302A; --bad-soft:#F7DEDB;
   --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
-  --body:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme: dark){:root{
-  --bg:#141917; --surface:#1D2421; --ink:#E7ECE9; --muted:#9AA6A1; --line:#2F3935;
-  --accent:#5BC096; --accent-ink:#0E1A15; --accent-soft:#1E3A2E;
+  --bg:#111511; --surface:#1A201A; --ink:#E8EDE7; --muted:#9AA79A; --line:#2D362D;
+  --brand:#36D330; --accent:#45DB3E; --accent-ink:#0A1A09; --accent-soft:#1D3A1C;
   --warn-soft:#3A2D16; --bad:#EE8A82; --bad-soft:#3D1F1C; color-scheme:dark}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding:0 16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding:0 16px;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 .wrap{max-width:560px;margin:0 auto;padding-block:20px 48px;display:grid;gap:18px}
-h1{font-family:var(--display);font-size:34px;line-height:1;letter-spacing:.02em;margin:0}
-h1 small{display:block;font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.04em;margin-top:6px}
+header{display:grid;gap:6px}
+.logo{display:block;width:190px;max-width:60%;height:auto}
+.logo path{fill:var(--brand)}
+.tagline{font-family:var(--display);font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
 section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px}
-h2{font-family:var(--display);font-size:20px;letter-spacing:.06em;margin:0;display:flex;align-items:center;gap:8px}
-h2 .step{font-size:13px;color:var(--muted)}
+h2{font-family:var(--display);font-size:22px;letter-spacing:.04em;text-transform:uppercase;margin:0;display:flex;align-items:center;gap:10px}
+h2 .step{font-size:13px;color:var(--accent-ink);background:var(--accent);border-radius:4px;padding:1px 7px;letter-spacing:0}
 .shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .shot{position:relative;aspect-ratio:1.75/1;max-width:100%;border:1.5px dashed var(--line);border-radius:8px;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px;overflow:hidden;background:var(--bg)}
 .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .shot input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.shot b{display:block;font-size:14px;color:var(--ink)}
+.shot b{display:block;font-size:15px;color:var(--ink)}
 .shot .x{position:absolute;top:6px;right:6px;z-index:2;border:0;background:var(--surface);color:var(--ink);border-radius:50%;width:26px;height:26px;font-size:15px;cursor:pointer}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:420px){.row{grid-template-columns:1fr}}
-label{display:grid;gap:4px;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.04em;min-width:0}
-input[type=text],input[type=date],input[type=email],input[type=password],textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%;min-width:0}
+label,.lbl{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;min-width:0}
+input[type=text],input[type=date],input[type=email],input[type=password],textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%;min-width:0;text-transform:none;letter-spacing:0;font-weight:400}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;max-width:100%;min-height:44px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
 textarea{min-height:64px;resize:vertical}
 input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
-.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:500}
-.btn{font:inherit;font-weight:700;font-size:16px;border:0;border-radius:8px;padding:13px 16px;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
+.chip{font:inherit;font-size:15px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn{font:inherit;font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase;border:0;border-radius:8px;padding:12px 16px;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
 .btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btns{display:grid;grid-template-columns:1fr 2fr;gap:10px}
-.note{font-size:13px;border-radius:6px;padding:9px 12px;background:var(--accent-soft)}
+.note{font-size:14px;border-radius:6px;padding:9px 12px;background:var(--accent-soft)}
 .note.warn{background:var(--warn-soft)} .note.bad{background:var(--bad-soft)}
-.status{font-size:13px;color:var(--muted);min-height:1.2em}
+.status{font-size:14px;color:var(--muted);min-height:1.2em}
 .status.ok{color:var(--accent)} .status.bad{color:var(--bad)}
 .recent{list-style:none;margin:0;padding:0}
-.recent li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.recent li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
 .recent li:first-child{border-top:0}
 .recent .who{font-weight:700;overflow-wrap:anywhere;min-width:0}
-.recent .meta{color:var(--muted);font-size:12px;grid-column:1/-1}
-.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);align-self:start}
-.empty{color:var(--muted);font-size:14px;margin:0}
+.recent .meta{color:var(--muted);font-size:13px;grid-column:1/-1}
+.pill{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--accent-soft);align-self:start}
+.empty{color:var(--muted);font-size:15px;margin:0}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:r .8s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes r{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 [hidden]{display:none!important}
 .field{display:grid;gap:8px}
-.lbl{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.04em}
 .addrow{display:flex;gap:8px;align-items:stretch}
 .addrow input{flex:1 1 auto}
-input[type=date]{-webkit-appearance:none;appearance:none;display:block;max-width:100%;min-width:0;min-height:44px;text-align:left}
-input[type=date]::-webkit-date-and-time-value{text-align:left}
 .mini{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;padding:0 12px;cursor:pointer;white-space:nowrap}
 .mini:disabled{opacity:.45;cursor:not-allowed}
-body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>RUNIX 名片掃描<small>拍照 → 自動辨識 → 存進 RUNIX 名片聯絡人</small></h1>
+  <header>
+    <svg class="logo" viewBox="140 155 1720 395" role="img" aria-label="RUNIX">
+      <path d="M145 417 L425 320 L425 384 L1064 163 L1064 208 L316 543 L316 484 L145 543 Z"/>
+      <path fill-rule="evenodd" d="M858 349 H1010 C1040 349 1064 373 1064 404 C1064 426 1051 444 1033 451 L1078 504 H1020 L980 458 H903 V504 H858 Z M903 390 H1008 C1015 390 1021 396 1021 403 C1021 410 1015 415 1008 415 H903 Z"/>
+      <path d="M1094 349 H1137 V441 C1137 452 1146 461 1157 461 H1238 C1249 461 1258 452 1258 441 V349 H1302 V441 C1302 476 1274 504 1239 504 H1157 C1122 504 1094 476 1094 441 Z"/>
+      <path d="M1330 349 L1489 435 V349 H1533 V504 L1375 418 V504 H1330 Z"/>
+      <path d="M1569 349 H1613 V504 H1569 Z"/>
+      <path d="M1632 349 H1694 L1743 396 L1791 349 H1855 L1775 428 L1855 504 H1791 L1743 457 L1694 504 H1632 L1711 428 Z"/>
+    </svg>
+    <p class="tagline">Business Card Scanner</p>
+  </header>
 
   <section id="gate" hidden>
-    <h2>輸入通關碼</h2>
-    <label for="codeInput">向 Lucio 取得通關碼，這支手機只需要輸入一次。<input id="codeInput" type="password" autocomplete="off"></label>
-    <button class="btn" id="codeBtn">開始使用</button>
+    <h2>Enter access code</h2>
+    <label for="codeInput">Get the code from Lucio. You only need to enter it once on this phone.<input id="codeInput" type="password" autocomplete="off"></label>
+    <button class="btn" id="codeBtn">Start</button>
     <div class="status" id="codeStatus"></div>
   </section>
 
   <div id="app" hidden style="display:grid;gap:18px">
     <section>
-      <h2><span class="step">1</span>拍名片</h2>
+      <h2><span class="step">1</span>Snap the card</h2>
       <div class="shots">
-        <div class="shot" id="shotFront"><span><b>正面</b>點這裡拍照或選圖</span>
-          <input id="fileFront" type="file" accept="image/*" capture="environment" aria-label="名片正面"></div>
-        <div class="shot" id="shotBack"><span><b>背面</b>選填</span>
-          <input id="fileBack" type="file" accept="image/*" capture="environment" aria-label="名片背面"></div>
+        <div class="shot" id="shotFront"><span><b>Front</b>Tap to take or pick a photo</span>
+          <input id="fileFront" type="file" accept="image/*" capture="environment" aria-label="Card front"></div>
+        <div class="shot" id="shotBack"><span><b>Back</b>Optional</span>
+          <input id="fileBack" type="file" accept="image/*" capture="environment" aria-label="Card back"></div>
       </div>
       <div class="field">
-        <span class="lbl" id="metLbl">認識場合</span>
+        <span class="lbl" id="metLbl">Where we met</span>
         <div class="chips" id="metChips" role="group" aria-labelledby="metLbl"></div>
         <div class="addrow">
-          <input id="met" type="text" placeholder="點選上面的選項，或輸入新的場合" aria-labelledby="metLbl">
-          <button class="mini" id="addMetBtn" type="button" hidden>＋ 加入選項</button>
+          <input id="met" type="text" placeholder="Pick one above, or type a new event" aria-labelledby="metLbl">
+          <button class="mini" id="addMetBtn" type="button" hidden>+ Add option</button>
         </div>
         <div class="status" id="metStatus" role="status"></div>
       </div>
-      <label for="metDate">認識日期<input id="metDate" type="date"></label>
-      <label for="scanner">掃描人（你的名字）<input id="scanner" type="text" placeholder="例：Lucio"></label>
-      <button class="btn" id="scanBtn" disabled>辨識名片</button>
+      <label for="metDate">Date met<input id="metDate" type="date"></label>
+      <label for="scanner">Scanned by (your name)<input id="scanner" type="text" placeholder="e.g. Lucio"></label>
+      <button class="btn" id="scanBtn" disabled>Scan card</button>
       <div class="status" id="scanStatus" role="status"></div>
     </section>
 
     <section id="review">
-      <h2><span class="step">2</span>確認資料</h2>
-      <div class="note" id="reviewNote">辨識後資料會自動填在這裡，可以先修改再存檔。</div>
+      <h2><span class="step">2</span>Check details</h2>
+      <div class="note" id="reviewNote">Scanned details appear here. You can edit them before saving.</div>
       <div class="row">
-        <label for="f_name">姓名<input id="f_name" type="text"></label>
-        <label for="f_company">公司<input id="f_company" type="text"></label>
+        <label for="f_name">Name<input id="f_name" type="text"></label>
+        <label for="f_company">Company<input id="f_company" type="text"></label>
       </div>
       <div class="row">
-        <label for="f_title">職稱<input id="f_title" type="text"></label>
+        <label for="f_title">Job title<input id="f_title" type="text"></label>
         <label for="f_email">Email<input id="f_email" type="email"></label>
       </div>
       <div class="row">
-        <label for="f_mobile">手機<input id="f_mobile" type="text" inputmode="tel"></label>
-        <label for="f_phone">電話<input id="f_phone" type="text" inputmode="tel"></label>
+        <label for="f_mobile">Mobile<input id="f_mobile" type="text" inputmode="tel"></label>
+        <label for="f_phone">Phone<input id="f_phone" type="text" inputmode="tel"></label>
       </div>
       <div class="row">
-        <label for="f_address">地址<input id="f_address" type="text"></label>
-        <label for="f_country">國家<input id="f_country" type="text" placeholder="例：美國"></label>
+        <label for="f_address">Address<input id="f_address" type="text"></label>
+        <label for="f_country">Country<input id="f_country" type="text" placeholder="e.g. United States"></label>
       </div>
       <div class="row">
-        <label for="f_website">網站<input id="f_website" type="text"></label>
-        <label for="f_other">其他聯絡方式<input id="f_other" type="text" placeholder="LINE / WeChat / IG"></label>
+        <label for="f_website">Website<input id="f_website" type="text"></label>
+        <label for="f_other">Other contacts<input id="f_other" type="text" placeholder="WhatsApp / WeChat / IG"></label>
       </div>
       <div>
-        <label style="margin-bottom:6px">客戶分類</label>
+        <span class="lbl" style="margin-bottom:6px">Contact type</span>
         <div class="chips" id="cats">
-          <button class="chip" type="button" data-v="經銷商" aria-pressed="false">經銷商</button>
-          <button class="chip" type="button" data-v="創作者" aria-pressed="false">創作者</button>
-          <button class="chip" type="button" data-v="供應商" aria-pressed="false">供應商</button>
-          <button class="chip" type="button" data-v="其他" aria-pressed="false">其他</button>
+          <button class="chip" type="button" data-v="Dealer" aria-pressed="false">Dealer</button>
+          <button class="chip" type="button" data-v="Creator" aria-pressed="false">Creator</button>
+          <button class="chip" type="button" data-v="Supplier" aria-pressed="false">Supplier</button>
+          <button class="chip" type="button" data-v="Other" aria-pressed="false">Other</button>
         </div>
       </div>
-      <label for="f_notes">備註<textarea id="f_notes" placeholder="聊到的需求、後續要做的事"></textarea></label>
+      <label for="f_notes">Notes<textarea id="f_notes" placeholder="What you talked about, follow-ups"></textarea></label>
       <div class="btns">
-        <button class="btn ghost" id="resetBtn" type="button">清除</button>
-        <button class="btn" id="saveBtn" type="button">存檔</button>
+        <button class="btn ghost" id="resetBtn" type="button">Clear</button>
+        <button class="btn" id="saveBtn" type="button">Save</button>
       </div>
       <div class="status" id="saveStatus" role="status"></div>
     </section>
 
     <section>
-      <h2>最近存的名片</h2>
+      <h2>Recently saved</h2>
       <ul class="recent" id="recent"></ul>
-      <p class="empty" id="recentEmpty">還沒有資料。</p>
+      <p class="empty" id="recentEmpty">No cards yet.</p>
     </section>
   </div>
 </div>
@@ -176,10 +186,10 @@ async function run(fn, ...args){
   try {
     r = await fetch(API_URL, { method: "POST", credentials: "omit", redirect: "follow",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ fn, args }) });
-  } catch(e) { throw new Error("連不上伺服器，請確認網路後再試一次。"); }
+  } catch(e) { throw new Error("Can't reach the server. Check your connection and try again."); }
   let j;
-  try { j = await r.json(); } catch(e) { throw new Error("伺服器回應異常（" + r.status + "），請稍後再試。"); }
-  if (!j.ok) throw new Error(j.error || "發生錯誤");
+  try { j = await r.json(); } catch(e) { throw new Error("The server sent an unexpected response (" + r.status + "). Try again in a moment."); }
+  if (!j.ok) throw new Error(j.error || "Something went wrong.");
   return j.result;
 }
 function errMsg(e){ return (e && e.message ? e.message : String(e)).replace(/^Error:\s*/, "").replace(/^Exception:\s*/, ""); }
@@ -192,7 +202,7 @@ function setStatus(id, msg, kind){
 function note(msg, kind){ const n = $("reviewNote"); n.className = "note" + (kind ? " " + kind : ""); n.textContent = msg; }
 function today(){ const d = new Date(); return new Date(d - d.getTimezoneOffset()*6e4).toISOString().slice(0,10); }
 
-// ---------- 通關碼 ----------
+// ---------- access code ----------
 async function start(){
   code = store.get("accessCode", "");
   let cfg = { needsCode: false };
@@ -205,7 +215,7 @@ async function start(){
 }
 $("codeBtn").onclick = async () => {
   const c = $("codeInput").value.trim(); if (!c) return;
-  setStatus("codeStatus", "確認中…", "busy");
+  setStatus("codeStatus", "Checking…", "busy");
   try { await run("verifyCode", c); code = c; store.set("accessCode", c); $("gate").hidden = true; openApp(); }
   catch(e){ setStatus("codeStatus", errMsg(e), "bad"); }
 };
@@ -220,7 +230,7 @@ function openApp(){
   loadRecent();
 }
 
-// ---------- 認識場合選項（所有人共用，存在 Sheet 的「選項」分頁） ----------
+// ---------- event options (shared, stored in the Sheet's 選項 tab) ----------
 let events = [];
 function renderEvents(){
   const v = $("met").value.trim(), box = $("metChips");
@@ -242,16 +252,16 @@ $("met").addEventListener("input", () => { setStatus("metStatus", ""); renderEve
 $("addMetBtn").onclick = async () => {
   const name = $("met").value.trim(); if (!name) return;
   $("addMetBtn").disabled = true;
-  setStatus("metStatus", "加入中…", "busy");
+  setStatus("metStatus", "Adding…", "busy");
   try {
     events = await run("addEvent", name, code);
     store.set("events", JSON.stringify(events));
-    setStatus("metStatus", "已加入選項「" + name + "」，所有同事都看得到。", "ok");
-  } catch(e) { setStatus("metStatus", "加入失敗：" + errMsg(e), "bad"); }
+    setStatus("metStatus", "Added “" + name + "”. Everyone on the team will see it.", "ok");
+  } catch(e) { setStatus("metStatus", "Couldn't add it: " + errMsg(e), "bad"); }
   finally { $("addMetBtn").disabled = false; renderEvents(); }
 };
 
-// ---------- 照片 ----------
+// ---------- photos ----------
 async function shrink(file, max = 1600, q = 0.82){
   const url = URL.createObjectURL(file);
   try{
@@ -266,11 +276,11 @@ async function shrink(file, max = 1600, q = 0.82){
 function bindShot(side, inputId, boxId){
   $(inputId).addEventListener("change", async e => {
     const f = e.target.files && e.target.files[0]; if (!f) return;
-    try { shots[side] = await shrink(f); } catch(err){ setStatus("scanStatus", "這張圖片讀不出來，請重拍。", "bad"); return; }
+    try { shots[side] = await shrink(f); } catch(err){ setStatus("scanStatus", "This photo can't be read. Please retake it.", "bad"); return; }
     const box = $(boxId);
     box.querySelector("img")?.remove(); box.querySelector(".x")?.remove();
-    const img = document.createElement("img"); img.src = shots[side]; img.alt = side === "front" ? "名片正面" : "名片背面"; box.prepend(img);
-    const x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "移除");
+    const img = document.createElement("img"); img.src = shots[side]; img.alt = side === "front" ? "Card front" : "Card back"; box.prepend(img);
+    const x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Remove photo");
     x.onclick = ev => { ev.stopPropagation(); shots[side] = null; img.remove(); x.remove(); $(inputId).value = ""; refresh(); };
     box.append(x); refresh();
   });
@@ -280,41 +290,41 @@ bindShot("back", "fileBack", "shotBack");
 function refresh(){ $("scanBtn").disabled = !shots.front; }
 function imagesPayload(){ return [shots.front, shots.back].filter(Boolean).map(d => ({ data: d.split(",")[1] })); }
 
-// ---------- 分類 ----------
+// ---------- contact type ----------
 function setCat(v){ category = v || ""; for (const b of $("cats").children) b.setAttribute("aria-pressed", String(b.dataset.v === category)); }
 $("cats").addEventListener("click", e => { const b = e.target.closest(".chip"); if (b) setCat(category === b.dataset.v ? "" : b.dataset.v); });
 
-// ---------- 辨識 ----------
+// ---------- scan ----------
 $("scanBtn").onclick = async () => {
   $("scanBtn").disabled = true;
-  setStatus("scanStatus", "辨識中…（約 5–15 秒）", "busy");
+  setStatus("scanStatus", "Reading the card… (about 5–15 seconds)", "busy");
   try{
     const r = await run("scanCard", imagesPayload(), code);
     for (const k of FIELDS) $("f_" + k).value = r[k] || "";
     if (r.category) setCat(r.category);
     if (r.card_notes && !$("f_notes").value) $("f_notes").value = r.card_notes;
     setStatus("scanStatus", "");
-    note("辨識完成。請核對姓名與電話，確認後按「存檔」。");
+    note("Done. Check the name and phone numbers, then tap Save.");
     $("review").scrollIntoView({ behavior: "smooth", block: "start" });
-  }catch(e){ setStatus("scanStatus", errMsg(e) + "　也可以直接手動填寫下方欄位。", "bad"); }
+  }catch(e){ setStatus("scanStatus", errMsg(e) + " You can also fill in the fields below by hand.", "bad"); }
   finally{ refresh(); }
 };
 
-// ---------- 存檔 ----------
+// ---------- save ----------
 $("saveBtn").onclick = async () => {
   const card = Object.fromEntries(FIELDS.map(k => [k, $("f_" + k).value.trim()]));
-  if (!card.name && !card.company){ setStatus("saveStatus", "至少要有姓名或公司才能存檔。", "bad"); return; }
+  if (!card.name && !card.company){ setStatus("saveStatus", "Enter at least a name or a company before saving.", "bad"); return; }
   Object.assign(card, { category, met: $("met").value.trim(), metDate: $("metDate").value, notes: $("f_notes").value.trim(), scanner: $("scanner").value.trim() });
   $("saveBtn").disabled = true;
-  setStatus("saveStatus", "存檔中…", "busy");
+  setStatus("saveStatus", "Saving…", "busy");
   try{
     const r = await run("saveCard", card, imagesPayload(), code);
     store.set("lastMet", card.met); store.set("scanner", card.scanner);
-    setStatus("saveStatus", "已存檔：" + (card.name || card.company), "ok");
+    setStatus("saveStatus", "Saved: " + (card.name || card.company), "ok");
     clearCard();
-    if (r.duplicate) note("提醒：Sheet 第 " + r.duplicate.row + " 列已有相同 Email 或手機（" + (r.duplicate.name || r.duplicate.company) + "），這筆仍已存入，可再確認是否重複。", "warn");
+    if (r.duplicate) note("Heads up: row " + r.duplicate.row + " in the Sheet has the same email or mobile (" + (r.duplicate.name || r.duplicate.company) + "). This card was still saved, so check for a duplicate.", "warn");
     loadRecent();
-  }catch(e){ setStatus("saveStatus", "存檔失敗：" + errMsg(e), "bad"); }
+  }catch(e){ setStatus("saveStatus", "Couldn't save: " + errMsg(e), "bad"); }
   finally{ $("saveBtn").disabled = false; }
 };
 function clearCard(){
@@ -323,12 +333,12 @@ function clearCard(){
   for (const [s, input, box] of [["front","fileFront","shotFront"],["back","fileBack","shotBack"]]){
     shots[s] = null; $(input).value = ""; $(box).querySelector("img")?.remove(); $(box).querySelector(".x")?.remove();
   }
-  note("可以拍下一張了。認識場合、日期和掃描人會保留。");
+  note("Ready for the next card. Event, date and your name are kept.");
   refresh();
 }
 $("resetBtn").onclick = () => { clearCard(); setStatus("saveStatus", ""); setStatus("scanStatus", ""); };
 
-// ---------- 最近 ----------
+// ---------- recent ----------
 async function loadRecent(){
   try{
     const rows = await run("getRecent", code);
