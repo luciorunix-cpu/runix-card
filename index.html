@@ -353,6 +353,9 @@ function updateEvSum(){
   $("evSum").textContent = [$("met").value.trim() || "No event picked", $("metDate").value, who ? "by " + who : "add your name"].filter(Boolean).join(" \u00B7 ");
 }
 for (const id of ["met", "metDate", "scanner"]) $(id).addEventListener("input", updateEvSum);
+// remember the scanner name (and event) on this phone as soon as it is typed
+$("scanner").addEventListener("input", () => store.set("scanner", $("scanner").value.trim()));
+$("met").addEventListener("change", () => store.set("lastMet", $("met").value.trim()));
 function refresh(){ $("scanBtn").disabled = !shots.front; }
 function imagesPayload(){ return [shots.front, shots.back].filter(Boolean).map(d => ({ data: d.split(",")[1] })); }
 
