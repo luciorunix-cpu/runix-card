@@ -434,7 +434,7 @@ async function loadRecent(){
       const li = document.createElement("li");
       const who = document.createElement("span"); who.className = "who"; who.textContent = [r.name, r.company].filter(Boolean).join(" · "); li.append(who);
       if (r.category){ const p = document.createElement("span"); p.className = "pill"; p.textContent = r.category; li.append(p); }
-      const m = document.createElement("span"); m.className = "meta"; m.textContent = [r.at, r.met, r.scanner && ("by " + r.scanner)].filter(Boolean).join(" · "); li.append(m);
+      const m = document.createElement("span"); m.className = "meta"; m.textContent = [r.at, r.met, "Scanned by " + (r.scanner || "\u2014")].filter(Boolean).join(" · "); li.append(m);
       ul.append(li);
     }
   }catch(e){}
