@@ -100,6 +100,8 @@ details.ev summary .edit{color:var(--accent);font-weight:700;white-space:nowrap}
 details.ev[open] summary .edit{display:none}
 .evbody{display:grid;gap:14px;margin-top:12px}
 .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.req{color:var(--bad);margin-left:3px}
+.invalid{border-color:var(--bad)!important;box-shadow:0 0 0 2px var(--bad-soft)}
 </style>
 </head>
 <body>
@@ -147,16 +149,16 @@ details.ev[open] summary .edit{display:none}
         <summary><span class="sum" id="evSum">Event details</span><span class="edit">Edit</span></summary>
         <div class="evbody">
           <div class="field">
-            <span class="lbl" id="metLbl">Where we met</span>
+            <span class="lbl" id="metLbl"><span>Where we met<span class="req" aria-hidden="true">*</span></span></span>
             <div class="chips" id="metChips" role="group" aria-labelledby="metLbl"></div>
             <div class="addrow">
-              <input id="met" type="text" placeholder="Pick one above, or type a new event" aria-labelledby="metLbl">
+              <input id="met" type="text" placeholder="Pick one above, or type a new event" aria-labelledby="metLbl" required aria-required="true">
               <button class="mini" id="addMetBtn" type="button" hidden>+ Add option</button>
             </div>
             <div class="status" id="metStatus" role="status"></div>
           </div>
           <label for="metDate">Date met<input id="metDate" type="date"></label>
-          <label for="scanner">Scanned by (your name)<input id="scanner" type="text" placeholder="e.g. Lucio"></label>
+          <label for="scanner"><span>Scanned by (your name)<span class="req" aria-hidden="true">*</span></span><input id="scanner" type="text" placeholder="e.g. Lucio" required aria-required="true"></label>
         </div>
       </details>
     </section>
@@ -260,7 +262,7 @@ $("codeBtn").onclick = async () => {
 };
 function openApp(){
   $("app").hidden = false;
-  setTimeout(() => { updateEvSum(); $("evBox").open = !$("scanner").value.trim(); }, 0);
+  setTimeout(() => { updateEvSum(); $("evBox").open = !$("scanner").value.trim() || !$("met").value.trim(); }, 0);
   $("metDate").value = today();
   $("met").value = store.get("lastMet", "");
   $("scanner").value = store.get("scanner", "");
@@ -350,7 +352,8 @@ $("drop").addEventListener("drop", e => { e.preventDefault(); $("drop").classLis
 // ---------- event details summary ----------
 function updateEvSum(){
   const who = $("scanner").value.trim();
-  $("evSum").textContent = [$("met").value.trim() || "No event picked", $("metDate").value, who ? "by " + who : "add your name"].filter(Boolean).join(" \u00B7 ");
+  $("evSum").textContent = [$("met").value.trim() || "Where we met? (required)", $("metDate").value, who ? "by " + who : "Your name? (required)"].filter(Boolean).join(" \u00B7 ");
+  for (const id of ["met", "scanner"]) if ($(id).value.trim()) $(id).classList.remove("invalid");
 }
 for (const id of ["met", "metDate", "scanner"]) $(id).addEventListener("input", updateEvSum);
 // remember the scanner name (and event) on this phone as soon as it is typed
@@ -385,6 +388,16 @@ $("scanBtn").onclick = doScan;
 $("saveBtn").onclick = async () => {
   const card = Object.fromEntries(FIELDS.map(k => [k, $("f_" + k).value.trim()]));
   if (!card.name && !card.company){ setStatus("saveStatus", "Enter at least a name or a company before saving.", "bad"); return; }
+  const missing = ["met", "scanner"].filter(id => !$(id).value.trim());
+  for (const id of ["met", "scanner"]) $(id).classList.toggle("invalid", missing.includes(id));
+  if (missing.length){
+    $("evBox").open = true;
+    const names = { met: "Where we met", scanner: "Scanned by" };
+    setStatus("saveStatus", "Fill in " + missing.map(id => names[id]).join(" and ") + " before saving.", "bad");
+    $(missing[0]).scrollIntoView({ behavior: "smooth", block: "center" });
+    $(missing[0]).focus({ preventScroll: true });
+    return;
+  }
   Object.assign(card, { category, met: $("met").value.trim(), metDate: $("metDate").value, notes: $("f_notes").value.trim(), scanner: $("scanner").value.trim() });
   $("saveBtn").disabled = true;
   setStatus("saveStatus", "Saving…", "busy");
