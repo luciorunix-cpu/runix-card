@@ -101,6 +101,7 @@ details.ev[open] summary .edit{display:none}
 .evbody{display:grid;gap:14px;margin-top:12px}
 .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .req{color:var(--bad);margin-left:3px}
+.invalid-group{outline:2px solid var(--bad);outline-offset:4px;border-radius:8px}
 .invalid{border-color:var(--bad)!important;box-shadow:0 0 0 2px var(--bad-soft)}
 </style>
 </head>
@@ -151,8 +152,8 @@ details.ev[open] summary .edit{display:none}
           <div class="field">
             <span class="lbl" id="metLbl"><span>Where we met<span class="req" aria-hidden="true">*</span></span></span>
             <div class="chips" id="metChips" role="group" aria-labelledby="metLbl"></div>
-            <div class="addrow">
-              <input id="met" type="text" placeholder="Pick one above, or type a new event" aria-labelledby="metLbl" required aria-required="true">
+            <div class="addrow" id="metRow" hidden>
+              <input id="met" type="text" placeholder="Type where you met, e.g. Dealer visit" aria-labelledby="metLbl" required aria-required="true">
               <button class="mini" id="addMetBtn" type="button" hidden>+ Add option</button>
             </div>
             <div class="status" id="metStatus" role="status"></div>
@@ -269,6 +270,7 @@ function openApp(){
   $("met").value = store.get("lastMet", "");
   $("scanner").value = store.get("scanner", "");
   try { events = JSON.parse(store.get("events", "[]")) || []; } catch(e) { events = []; }
+  { const v0 = $("met").value.trim(); metOther = !!v0 && !events.includes(v0); }
   renderEvents();
   loadEvents();
   loadRecent();
@@ -276,21 +278,34 @@ function openApp(){
 
 // ---------- event options (shared, stored in the Sheet's 選項 tab) ----------
 let events = [];
+let metOther = false;
 function renderEvents(){
   const v = $("met").value.trim(), box = $("metChips");
   box.textContent = "";
   for (const ev of events){
     const b = document.createElement("button");
     b.type = "button"; b.className = "chip"; b.textContent = ev;
-    b.setAttribute("aria-pressed", String(v === ev));
-    b.onclick = () => { $("met").value = $("met").value.trim() === ev ? "" : ev; setStatus("metStatus", ""); renderEvents(); };
+    b.setAttribute("aria-pressed", String(!metOther && v === ev));
+    b.onclick = () => { const on = !metOther && $("met").value.trim() === ev; metOther = false; $("met").value = on ? "" : ev; setStatus("metStatus", ""); renderEvents(); };
     box.append(b);
   }
-  $("addMetBtn").hidden = !v || events.some(e => e.toLowerCase() === v.toLowerCase());
+  const o = document.createElement("button");
+  o.type = "button"; o.className = "chip"; o.textContent = "Other";
+  o.setAttribute("aria-pressed", String(metOther));
+  o.onclick = () => {
+    metOther = !metOther;
+    if (!metOther || events.includes($("met").value.trim())) $("met").value = "";
+    setStatus("metStatus", ""); renderEvents();
+    if (metOther) $("met").focus();
+  };
+  box.append(o);
+  $("metRow").hidden = !metOther;
+  $("addMetBtn").hidden = !v || !metOther || events.some(e => e.toLowerCase() === v.toLowerCase());
   updateEvSum();
 }
 async function loadEvents(){
   try { events = await run("getEvents", code); store.set("events", JSON.stringify(events)); } catch(e) {}
+  if (document.activeElement !== $("met")) { const v0 = $("met").value.trim(); metOther = !!v0 && !events.includes(v0); }
   renderEvents();
 }
 $("met").addEventListener("input", () => { setStatus("metStatus", ""); renderEvents(); });
@@ -300,6 +315,7 @@ $("addMetBtn").onclick = async () => {
   setStatus("metStatus", "Adding…", "busy");
   try {
     events = await run("addEvent", name, code);
+    metOther = false;
     store.set("events", JSON.stringify(events));
     setStatus("metStatus", "Added “" + name + "”. Everyone on the team will see it.", "ok");
   } catch(e) { setStatus("metStatus", "Couldn't add it: " + errMsg(e), "bad"); }
@@ -356,6 +372,7 @@ function updateEvSum(){
   const who = $("scanner").value.trim();
   $("evSum").textContent = [$("met").value.trim() || "Where we met? (required)", $("metDate").value, who ? "by " + who : "Your name? (required)"].filter(Boolean).join(" \u00B7 ");
   for (const id of ["met", "scanner"]) if ($(id).value.trim()) $(id).classList.remove("invalid");
+  if ($("met").value.trim()) $("metChips").classList.remove("invalid-group");
 }
 for (const id of ["met", "metDate", "scanner"]) $(id).addEventListener("input", updateEvSum);
 // remember the scanner name (and event) on this phone as soon as it is typed
@@ -396,8 +413,10 @@ $("saveBtn").onclick = async () => {
     $("evBox").open = true;
     const names = { met: "Where we met", scanner: "Scanned by" };
     setStatus("saveStatus", "Fill in " + missing.map(id => names[id]).join(" and ") + " before saving.", "bad");
-    $(missing[0]).scrollIntoView({ behavior: "smooth", block: "center" });
-    $(missing[0]).focus({ preventScroll: true });
+    $("metChips").classList.toggle("invalid-group", missing.includes("met") && !metOther);
+    const target = missing[0] === "met" && !metOther ? $("metChips") : $(missing[0]);
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (target.tagName === "INPUT") target.focus({ preventScroll: true });
     return;
   }
   const otherType = $("catOther").value.trim();
