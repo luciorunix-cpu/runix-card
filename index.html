@@ -195,6 +195,7 @@ details.ev[open] summary .edit{display:none}
           <button class="chip" type="button" data-v="Supplier" aria-pressed="false">Supplier</button>
           <button class="chip" type="button" data-v="Other" aria-pressed="false">Other</button>
         </div>
+        <input id="catOther" type="text" placeholder="Type the contact type, e.g. Investor, Media agency" aria-label="Other contact type" hidden style="margin-top:8px">
       </div>
       <label for="f_notes">Notes<textarea id="f_notes" placeholder="What you talked about, follow-ups"></textarea></label>
       <div class="btns">
@@ -364,8 +365,8 @@ function refresh(){ $("scanBtn").disabled = !shots.front; }
 function imagesPayload(){ return [shots.front, shots.back].filter(Boolean).map(d => ({ data: d.split(",")[1] })); }
 
 // ---------- contact type ----------
-function setCat(v){ category = v || ""; for (const b of $("cats").children) b.setAttribute("aria-pressed", String(b.dataset.v === category)); }
-$("cats").addEventListener("click", e => { const b = e.target.closest(".chip"); if (b) setCat(category === b.dataset.v ? "" : b.dataset.v); });
+function setCat(v){ category = v || ""; for (const b of $("cats").children) b.setAttribute("aria-pressed", String(b.dataset.v === category)); $("catOther").hidden = category !== "Other"; if (category !== "Other") $("catOther").value = ""; }
+$("cats").addEventListener("click", e => { const b = e.target.closest(".chip"); if (b) { setCat(category === b.dataset.v ? "" : b.dataset.v); if (category === "Other") $("catOther").focus(); } });
 
 // ---------- scan ----------
 async function doScan(){
@@ -399,7 +400,8 @@ $("saveBtn").onclick = async () => {
     $(missing[0]).focus({ preventScroll: true });
     return;
   }
-  Object.assign(card, { category, met: $("met").value.trim(), metDate: $("metDate").value, notes: $("f_notes").value.trim(), scanner: $("scanner").value.trim() });
+  const otherType = $("catOther").value.trim();
+  Object.assign(card, { category: category === "Other" && otherType ? "Other: " + otherType : category, met: $("met").value.trim(), metDate: $("metDate").value, notes: $("f_notes").value.trim(), scanner: $("scanner").value.trim() });
   $("saveBtn").disabled = true;
   setStatus("saveStatus", "Saving…", "busy");
   try{
